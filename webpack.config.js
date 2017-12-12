@@ -1,6 +1,6 @@
-import path from 'path';
+const path = require('path');
 
-import webpack from 'webpack';
+const webpack = require('webpack');
 
 module.exports = {
   entry: './src/app.js',
