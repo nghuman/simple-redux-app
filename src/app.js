@@ -1,18 +1,13 @@
 "use strict"
 
-import { createStore } from "redux"
+import { createStore } from "redux";
 
-const reducer = function(state={books:[]}, action) {
-  switch (action.type) {
-    case "POST_BOOK":
-    return {books:[...state.books, ...action.payload]}
-    break;
-  }
-  // return state
-}
+// IMPORT COMBINED REDUCERS
+
+import reducers from "./reducers/index.js"
 
 // STEP 1 create the store
-const store = createStore(reducer);
+const store = createStore(reducers);
 store.subscribe(function(){
   console.log('current state is: ', store.getState());
   // console.log('current price: ', store.getState()[1].price);
@@ -33,12 +28,18 @@ store.dispatch({
   }]
 })
 
+// UPDATE a book
 store.dispatch({
-  type: "POST_BOOK",
-  payload: [{
-    id: 3,
-    title:'this is the third book title',
-    description: 'this is the third book description',
-    price: 50
-  }]
+  type:"UPDATE_BOOK",
+  payload:{
+    id: 2,
+    title:'Learn React in 24h'
+  }
+})
+
+//-->> CART ACTIONS <<--
+// ADD TO CART
+store.dispatch({
+  type:"ADD_TO_CART",
+  payload: [{id: 2}]
 })
