@@ -27,7 +27,7 @@ render(
 )
 // STEP 2 create and dispatch actions
 // store.dispatch(postBooks(
-// 
+//
 // ))
 // // DELETE a book
 // store.dispatch(deleteBooks({id: 1}))
