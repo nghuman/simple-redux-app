@@ -32388,12 +32388,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function booksReducers() {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
     books: [{
-      id: 1,
+      _id: 1,
       title: 'this is the book title',
       description: 'this is the book description',
       price: 44.33
     }, {
-      id: 2,
+      _id: 2,
       title: 'this is the second book title',
       description: 'this is the second book description',
       price: 55
@@ -32417,7 +32417,7 @@ function booksReducers() {
       // Determine at which index in books
       // array is the book to be deleted
       var indexToDelete = currentBookToDelete.findIndex(function (book) {
-        return book.id === action.payload.id;
+        return book._id === action.payload._id;
       });
       //use slice to remove the book at the
       // specified index
@@ -32431,7 +32431,7 @@ function booksReducers() {
       // Determine at which index in books array
       // is the book to be deleted
       var indexToUpdate = currentBookToUpdate.findIndex(function (book) {
-        return book.id === action.payload.id;
+        return book._id === action.payload._id;
       });
       // Create a new book object with the new
       // values and with the same array index of the item
@@ -32461,6 +32461,9 @@ function booksReducers() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 exports.cartReducers = cartReducers;
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -32473,6 +32476,27 @@ function cartReducers() {
 
     case "ADD_TO_CART":
       return { cart: [].concat(_toConsumableArray(state), _toConsumableArray(action.payload)) };
+      break;
+
+    case "DELETE_CART_ITEM":
+      return { cart: [].concat(_toConsumableArray(state), _toConsumableArray(action.payload)) };
+      break;
+
+    case "UPDATE_CART":
+      // Create a copy of the current array of books
+      var currentBookToUpdate = [].concat(_toConsumableArray(state.cart));
+      // Determine at which index in books array is the book to be deleted
+      var indexToUpdate = currentBookToUpdate.findIndex(function (book) {
+        return book._id === action._id;
+      });
+
+      var newBookToUpdate = _extends({}, currentBookToUpdate[indexToUpdate], {
+        quantity: currentBookToUpdate[indexToUpdate].quantity + action.unit
+      });
+
+      var cartUpdate = [].concat(_toConsumableArray(currentBookToUpdate.slice(0, indexToUpdate)), [newBookToUpdate], _toConsumableArray(currentBookToUpdate.slice(indexToUpdate + 1)));
+
+      return _extends({}, state, { cart: cartUpdate });
       break;
   }
   return state;
@@ -32489,10 +32513,28 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.addToCart = addToCart;
+exports.updateCart = updateCart;
+exports.deleteCartItem = deleteCartItem;
 function addToCart(book) {
   return {
     type: "ADD_TO_CART",
     payload: book
+  };
+}
+
+// UPDATE CART
+function updateCart(_id, unit) {
+  return {
+    type: "UPDATE_CART",
+    _id: _id,
+    unit: unit
+  };
+}
+
+function deleteCartItem(cart) {
+  return {
+    type: "DELETE_CART_ITEM",
+    payload: cart
   };
 }
 
@@ -32562,9 +32604,9 @@ var BooksList = function (_React$Component) {
       var booksList = this.props.books.map(function (booksArr) {
         return _react2.default.createElement(
           _reactBootstrap.Col,
-          { xs: 12, sm: 6, md: 4, key: booksArr.id },
+          { xs: 12, sm: 6, md: 4, key: booksArr._id },
           _react2.default.createElement(_bookItem2.default, {
-            id: booksArr.id,
+            _id: booksArr._id,
             title: booksArr.title,
             description: booksArr.description,
             price: booksArr.price })
@@ -43925,10 +43967,11 @@ var BookItem = function (_React$Component) {
 
     return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = BookItem.__proto__ || Object.getPrototypeOf(BookItem)).call.apply(_ref, [this].concat(args))), _this), _this.handleCart = function () {
       var book = [].concat(_toConsumableArray(_this.props.cart), [{
-        id: _this.props.id,
+        _id: _this.props._id,
         title: _this.props.title,
         description: _this.props.description,
-        price: _this.props.price
+        price: _this.props.price,
+        quantity: 1
       }]);
       _this.props.addToCart(book);
     }, _temp), _possibleConstructorReturn(_this, _ret);
@@ -44137,7 +44180,13 @@ var _reactRedux = __webpack_require__(162);
 
 var _reactBootstrap = __webpack_require__(110);
 
+var _redux = __webpack_require__(71);
+
+var _cartActions = __webpack_require__(345);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -44149,9 +44198,28 @@ var Cart = function (_React$Component) {
   _inherits(Cart, _React$Component);
 
   function Cart() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
     _classCallCheck(this, Cart);
 
-    return _possibleConstructorReturn(this, (Cart.__proto__ || Object.getPrototypeOf(Cart)).apply(this, arguments));
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Cart.__proto__ || Object.getPrototypeOf(Cart)).call.apply(_ref, [this].concat(args))), _this), _this.onDelete = function (_id) {
+      // Create a copy of the current array of books
+      var currentBookToDelete = _this.props.cart;
+      // Determine at which index in books array is the book to be deleted
+      var indexToDelete = currentBookToDelete.findIndex(function (cart) {
+        return cart._id === _id;
+      });
+      //use slice to remove the book at the specified index
+      var cartAfterDelete = [].concat(_toConsumableArray(currentBookToDelete.slice(0, indexToDelete)), _toConsumableArray(currentBookToDelete.slice(indexToDelete + 1)));
+
+      _this.props.deleteCartItem(cartAfterDelete);
+    }, _temp), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(Cart, [{
@@ -44172,9 +44240,11 @@ var Cart = function (_React$Component) {
     key: 'renderCart',
     value: function renderCart() {
       var cartItemsList = this.props.cart.map(function (cartArr) {
+        var _this2 = this;
+
         return _react2.default.createElement(
           _reactBootstrap.Panel,
-          { key: cartArr.id },
+          { key: cartArr._id },
           _react2.default.createElement(
             _reactBootstrap.Row,
             null,
@@ -44185,11 +44255,75 @@ var Cart = function (_React$Component) {
                 'h6',
                 null,
                 cartArr.title
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                '    '
+              )
+            ),
+            _react2.default.createElement(
+              _reactBootstrap.Col,
+              { xs: 12, sm: 2 },
+              _react2.default.createElement(
+                'h6',
+                null,
+                'usd. ',
+                cartArr.price
+              )
+            ),
+            _react2.default.createElement(
+              _reactBootstrap.Col,
+              { xs: 12, sm: 2 },
+              _react2.default.createElement(
+                'h6',
+                null,
+                'qty. ',
+                _react2.default.createElement(
+                  _reactBootstrap.Label,
+                  {
+                    bsStyle: 'success' },
+                  cartArr.quantity
+                )
+              )
+            ),
+            _react2.default.createElement(
+              _reactBootstrap.Col,
+              { xs: 6, sm: 4 },
+              _react2.default.createElement(
+                _reactBootstrap.ButtonGroup,
+                { style: { minWidth: '300px' } },
+                _react2.default.createElement(
+                  _reactBootstrap.Button,
+                  { bsStyle: 'default',
+                    bsSize: 'small' },
+                  '-'
+                ),
+                _react2.default.createElement(
+                  _reactBootstrap.Button,
+                  { bsStyle: 'default',
+                    bsSize: 'small' },
+                  '+'
+                ),
+                _react2.default.createElement(
+                  'span',
+                  null,
+                  '     '
+                ),
+                _react2.default.createElement(
+                  _reactBootstrap.Button,
+                  { onClick: function onClick() {
+                      return _this2.onDelete(cartArr._id);
+                    },
+                    bsStyle: 'danger',
+                    bsSize: 'small' },
+                  'DELETE'
+                )
               )
             )
           )
         );
-      });
+      }, this);
 
       return _react2.default.createElement(
         _reactBootstrap.Panel,
@@ -44208,7 +44342,14 @@ function mapStateToProps(state) {
   };
 }
 
-exports.default = (0, _reactRedux.connect)(mapStateToProps)(Cart);
+function mapDispatchToProps(dispatch) {
+  return (0, _redux.bindActionCreators)({
+    deleteCartItem: _cartActions.deleteCartItem,
+    updateCart: _cartActions.updateCart
+  }, dispatch);
+}
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(Cart);
 
 /***/ })
 /******/ ]);
