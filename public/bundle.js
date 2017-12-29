@@ -43973,7 +43973,26 @@ var BookItem = function (_React$Component) {
         price: _this.props.price,
         quantity: 1
       }]);
-      _this.props.addToCart(book);
+
+      // CHECK IF CART IS EMPTY
+      if (_this.props.cart.length > 0) {
+        // CART IS NOT EMPTY
+        var _id = _this.props._id;
+
+        var cartIndex = _this.props.cart.findIndex(function (cart) {
+          return cart._id === _id;
+        });
+        // IF RETURNS -1 THERE ARE NO ITEMS WITH SAME ID
+        if (cartIndex === -1) {
+          _this.props.addToCart(book);
+        } else {
+          // WE NEED TO UPDATE QUANTITY
+          _this.props.updateCart(_id, 1);
+        }
+      } else {
+        // CART IS EMPTY
+        _this.props.addToCart(book);
+      }
     }, _temp), _possibleConstructorReturn(_this, _ret);
   }
 
@@ -44027,7 +44046,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return (0, _redux.bindActionCreators)({ addToCart: _cartActions.addToCart }, dispatch);
+  return (0, _redux.bindActionCreators)({ addToCart: _cartActions.addToCart, updateCart: _cartActions.updateCart }, dispatch);
 }
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(BookItem);
@@ -44198,17 +44217,11 @@ var Cart = function (_React$Component) {
   _inherits(Cart, _React$Component);
 
   function Cart() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
     _classCallCheck(this, Cart);
 
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
+    var _this = _possibleConstructorReturn(this, (Cart.__proto__ || Object.getPrototypeOf(Cart)).call(this));
 
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Cart.__proto__ || Object.getPrototypeOf(Cart)).call.apply(_ref, [this].concat(args))), _this), _this.onDelete = function (_id) {
+    _this.onDelete = function (_id) {
       // Create a copy of the current array of books
       var currentBookToDelete = _this.props.cart;
       // Determine at which index in books array is the book to be deleted
@@ -44219,7 +44232,30 @@ var Cart = function (_React$Component) {
       var cartAfterDelete = [].concat(_toConsumableArray(currentBookToDelete.slice(0, indexToDelete)), _toConsumableArray(currentBookToDelete.slice(indexToDelete + 1)));
 
       _this.props.deleteCartItem(cartAfterDelete);
-    }, _temp), _possibleConstructorReturn(_this, _ret);
+    };
+
+    _this.onIncrement = function (_id) {
+      _this.props.updateCart(_id, 1);
+    };
+
+    _this.onDecrement = function (_id, quantity) {
+      if (quantity > 1) {
+        _this.props.updateCart(_id, -1);
+      }
+    };
+
+    _this.open = function () {
+      _this.setState({ showModal: true });
+    };
+
+    _this.close = function () {
+      _this.setState({ showModal: false });
+    };
+
+    _this.state = {
+      showModal: false
+    };
+    return _this;
   }
 
   _createClass(Cart, [{
@@ -44295,13 +44331,19 @@ var Cart = function (_React$Component) {
                 { style: { minWidth: '300px' } },
                 _react2.default.createElement(
                   _reactBootstrap.Button,
-                  { bsStyle: 'default',
+                  { onClick: function onClick() {
+                      return _this2.onDecrement(cartArr._id, cartArr.quantity);
+                    },
+                    bsStyle: 'default',
                     bsSize: 'small' },
                   '-'
                 ),
                 _react2.default.createElement(
                   _reactBootstrap.Button,
-                  { bsStyle: 'default',
+                  { onClick: function onClick() {
+                      return _this2.onIncrement(cartArr._id);
+                    },
+                    bsStyle: 'default',
                     bsSize: 'small' },
                   '+'
                 ),
@@ -44328,7 +44370,74 @@ var Cart = function (_React$Component) {
       return _react2.default.createElement(
         _reactBootstrap.Panel,
         { header: 'Cart', bsStyle: 'primary' },
-        cartItemsList
+        cartItemsList,
+        _react2.default.createElement(
+          _reactBootstrap.Row,
+          null,
+          _react2.default.createElement(
+            _reactBootstrap.Col,
+            { xs: 12 },
+            _react2.default.createElement(
+              'h6',
+              null,
+              'Total amount:'
+            ),
+            _react2.default.createElement(
+              _reactBootstrap.Button,
+              {
+                onClick: this.open,
+                bsStyle: 'success', bsSize: 'small' },
+              'PROCEED TO CHECKOUT'
+            )
+          )
+        ),
+        _react2.default.createElement(
+          _reactBootstrap.Modal,
+          { show: this.state.showModal,
+            onHide: this.close },
+          _react2.default.createElement(
+            _reactBootstrap.Modal.Header,
+            { closeButton: true },
+            _react2.default.createElement(
+              _reactBootstrap.Modal.Title,
+              null,
+              'Thank you!'
+            )
+          ),
+          _react2.default.createElement(
+            _reactBootstrap.Modal.Body,
+            null,
+            _react2.default.createElement(
+              'h6',
+              null,
+              'Your order has been saved'
+            ),
+            _react2.default.createElement(
+              'p',
+              null,
+              'You will receive an email confirmation'
+            )
+          ),
+          _react2.default.createElement(
+            _reactBootstrap.Modal.Footer,
+            null,
+            _react2.default.createElement(
+              _reactBootstrap.Col,
+              { xs: 6 },
+              _react2.default.createElement(
+                'h6',
+                null,
+                'total $:'
+              )
+            ),
+            _react2.default.createElement(
+              _reactBootstrap.Button,
+              {
+                onClick: this.close },
+              'Close'
+            )
+          )
+        )
       );
     }
   }]);

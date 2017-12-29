@@ -1,7 +1,7 @@
 "use strict"
 import React from 'react';
 import {connect} from 'react-redux';
-import {Panel, Col, Row, Well, Button, ButtonGroup, Label} from 'react-bootstrap';
+import {Modal, Panel, Col, Row, Well, Button, ButtonGroup, Label} from 'react-bootstrap';
 import {bindActionCreators} from 'redux';
 import {deleteCartItem, updateCart} from '../../actions/cartActions';
 
@@ -19,6 +19,31 @@ class Cart extends React.Component{
       ...currentBookToDelete.slice(indexToDelete + 1)]
 
     this.props.deleteCartItem(cartAfterDelete);
+  }
+
+  onIncrement = (_id) => {
+    this.props.updateCart(_id, 1);
+  }
+
+  onDecrement = (_id, quantity) => {
+    if(quantity > 1){
+      this.props.updateCart(_id, -1);
+    }
+  }
+
+  constructor(){
+    super();
+    this.state = {
+      showModal:false
+    }
+  }
+
+  open = () => {
+    this.setState({showModal:true})
+  }
+
+  close = () => {
+    this.setState({showModal:false})
   }
 
   render() {
@@ -50,9 +75,11 @@ class Cart extends React.Component{
             </Col>
             <Col xs={6} sm={4}>
               <ButtonGroup style={{minWidth:'300px'}}>
-                <Button bsStyle="default"
+                <Button onClick={() => this.onDecrement(cartArr._id, cartArr.quantity)}
+                  bsStyle="default"
                   bsSize="small">-</Button>
-                <Button bsStyle="default"
+                <Button onClick={() => this.onIncrement(cartArr._id)}
+                  bsStyle="default"
                   bsSize="small">+</Button>
                   <span>     </span>
                 <Button onClick={() => this.onDelete(cartArr._id)}
@@ -68,7 +95,38 @@ class Cart extends React.Component{
     return(
       <Panel header="Cart" bsStyle="primary">
         {cartItemsList}
-      </Panel>
+        <Row>
+          <Col xs={12}>
+            <h6>Total amount:</h6>
+            <Button
+              onClick={this.open}
+              bsStyle="success" bsSize="small">
+              PROCEED TO CHECKOUT
+            </Button>
+          </Col>
+        </Row>
+        <Modal show={this.state.showModal}
+          onHide={this.close}>
+          <Modal.Header closeButton>
+            <Modal.Title>Thank
+              you!</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <h6>Your order has been
+                saved</h6>
+                <p>You will receive an email
+                  confirmation</p>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Col xs={6}>
+                    <h6>total $:</h6>
+                  </Col>
+                  <Button
+                    onClick={this.close}>Close</Button
+                    >
+                    </Modal.Footer>
+                  </Modal>
+                </Panel>
     )
   }
 
