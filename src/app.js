@@ -19,10 +19,16 @@ const middleware = applyMiddleware(logger)
 const store = createStore(reducers, middleware);
 
 import BooksList from './components/pages/bookslist';
+import Menu from './components/menu.js';
+import Footer from './components/footer.js';
 
 render(
   <Provider store={store}>
-    <BooksList />
+    <div>
+      <Menu />
+      <BooksList />
+      <Footer />
+    </div>
   </Provider>, document.getElementById('app')
 )
 // STEP 2 create and dispatch actions
