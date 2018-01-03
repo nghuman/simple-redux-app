@@ -3,6 +3,8 @@
 import React from 'react';
 import {render} from 'react-dom';
 import {Provider} from 'react-redux';
+// REACT-ROUTER
+import {Router, Route, IndexRoute, browserHistory} from 'react-router';
 
 import {applyMiddleware, createStore } from "redux";
 import logger from 'redux-logger';
@@ -19,17 +21,24 @@ const middleware = applyMiddleware(logger)
 const store = createStore(reducers, middleware);
 
 import BooksList from './components/pages/bookslist';
-import Menu from './components/menu.js';
-import Footer from './components/footer.js';
+import Cart from './components/pages/cart';
+import BooksForm from './components/pages/booksForm';
+import Main from './main';
+
+const Routes = (
+  <Provider store={store}>
+    <Router history={browserHistory}>
+      <Route path="/" component={Main}>
+        <IndexRoute component={BooksList}/>
+        <Route path="/admin" component={BooksForm}/>
+        <Route path="/cart" component={Cart}/>
+      </Route>
+    </Router>
+  </Provider>
+)
 
 render(
-  <Provider store={store}>
-    <div>
-      <Menu />
-      <BooksList />
-      <Footer />
-    </div>
-  </Provider>, document.getElementById('app')
+  Routes, document.getElementById('app')
 )
 // STEP 2 create and dispatch actions
 // store.dispatch(postBooks(
